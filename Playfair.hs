@@ -10,12 +10,12 @@ import qualified Cryptography.Playfair_String as PFS
 ePlayfair' :: String -> [String] -> String
 ePlayfair' [] _ = []
 ePlayfair' (x:y:[]) m | xi==yi = [m !! xi !! (mod (xj+1) 5)] ++ [m !! yi !! (mod (yj+1) 5)]
-                       | xj==yj = [m !! (mod (xi+1) 5) !! xj] ++ [m !! (mod (yi+1) 5) !! yj]
-                       | otherwise = [m !! xi !! yj] ++ [m !! yi !! xj]
-                       where xi = fst (PFM.matrix m x)
-                             xj = snd (PFM.matrix m x)
-                             yi = fst (PFM.matrix m y)
-                             yj = snd (PFM.matrix m y)
+                      | xj==yj = [m !! (mod (xi+1) 5) !! xj] ++ [m !! (mod (yi+1) 5) !! yj]
+                      | otherwise = [m !! xi !! yj] ++ [m !! yi !! xj]
+                      where xi = fst (PFM.matrix m x)
+                            xj = snd (PFM.matrix m x)
+                            yi = fst (PFM.matrix m y)
+                            yj = snd (PFM.matrix m y)
 ePlayfair' _ _ = []
 
 ePlayfair :: String -> String -> String -> Char -> String
