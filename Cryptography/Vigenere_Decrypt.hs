@@ -2,7 +2,9 @@ module Cryptography.Vigenere_Decrypt (
     matrix,
     f,
     ic,
-    mg
+    mmg,
+    mg,
+    findMax
 ) where
 
 import Data.Char
@@ -43,8 +45,8 @@ ic' xs = (fromIntegral (sum (zipWith (*) fi fim1))) / (fromIntegral (n*(n-1)))
              fi = f xs 0
              fim1 = map (\x -> x-1) fi
 
-ic :: [String] -> [Int]
-ic xs = map (\x -> round ((ic' x)*1000)) xs
+ic :: [String] -> [Double]
+ic xs = map (\x -> ic' x) xs
 
 --------------------------------------- CALCULATE VALUES M_j --------------------------------------
 

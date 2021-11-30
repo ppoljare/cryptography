@@ -1,9 +1,22 @@
 import Data.Char
 import Data.List
 import qualified Cryptography.Vigenere as Vigenere
+import qualified Cryptography.Vigenere_Decrypt as VD
 import qualified Cryptography.Eval as Eval
+import qualified Cryptography.Commands as CC
 
 ----------------------------------------------- MAIN ----------------------------------------------
+mainM :: [String] -> IO()
+mainM [] = do putStr "DONE\n"
+mainM (x:xs) = do let mj = VD.mmg x
+                  putStr "M: "
+                  print (mj)
+                  putStr ("\nM[j]: " ++ (show (maximum mj)))
+                  putStr (",  j: " ++ (show (VD.findMax mj)))
+                  putStr (",  -j%26: " ++ (show (mod (-VD.findMax mj) 26)))
+                  putStr "\n\n"
+                  mainM xs
+
 mainDV :: String -> IO()
 mainDV cipher = do putStr "Decryption mode > "
                    input <- getLine
@@ -29,26 +42,31 @@ mainDV cipher = do putStr "Decryption mode > "
 
 main :: IO()
 main = do let vigenereCipher = "JFELLQVVRTPVNNVZXVTEFDMQBQGZAGVTRVIMBWZQZVSEEUMHQIKZUCPWKFXXVTIGQCVXRFXBWMAPAGJSGTANONVDCFUEMKIFJJITZNONVVWWJNVYCQJSMTARPHAPLAFDRXRROIQLAIBOFDTBWSFEDBSIEZOGFOJEI"
-          --let strapacCipher = "HBQAFDTRDIJILJHORIRARSGDZMSOUTTPDKCZZSLFTIQAQJGUOEWOOPNSWURKTPUVKPTTDUROUIMEUTHOSIUAMJHSWSSAYZCSHFUITAMJHKQJHJHNWDHOYIUENDMEFNDZDMLEMECAUVZKRSNOUORTXOQEQOITDKVTC"
           let cipher = vigenereCipher
           putStr "main > "
           mode <- getLine
           
+          ---------- HELP ----------
           if (mode=="help") then
             do putStr "commands:\n"
                putStr "  ft - find trigrams\n"
                putStr "  e - encrypt: input plain text and key\n"
                putStr "  d - decrypt: input cipher and key\n"
+               putStr "  matrix <m> - print letters matrix for m\n"
+               putStr "  ic <m> - calculate coincidence index for m\n"
+               putStr "  M <m> - calculate M_j for m and print max(M_j)\n"
                putStr "  dv - enter Decryption mode\n"
                putStr "  dvi - enter Decryption mode with input\n"
-               putStr "  eval - evaluate string\n"
+               putStr "  eval <x> - evaluate string x\n"
                putStr "  :quit - quit the program\n\n"
-               main
+          
+          ---------- FIND TRIGRAMS ----------
           else if (mode=="ft") then
             do putStr "Searching...\n"
                print (Vigenere.findTrigrams cipher)
                putStr "\n"
-               main
+          
+          ---------- ENCRYPT ----------
           else if (mode=="e") then
             do putStr "  plaintext > "
                text <- getLine
@@ -57,7 +75,8 @@ main = do let vigenereCipher = "JFELLQVVRTPVNNVZXVTEFDMQBQGZAGVTRVIMBWZQZVSEEUMH
                putStr "Cipher: "
                putStr (Vigenere.eVigenere text key)
                putStr "\n\n"
-               main
+          
+          ---------- DECRYPT ----------
           else if (mode=="d") then
             do putStr "  cipher > "
                cipher <- getLine
@@ -66,21 +85,50 @@ main = do let vigenereCipher = "JFELLQVVRTPVNNVZXVTEFDMQBQGZAGVTRVIMBWZQZVSEEUMH
                putStr "Plaintext: "
                putStr (Vigenere.dVigenere cipher key)
                putStr "\n\n"
-               main
+          
+          ---------- STRING TO MATRIX ----------
+          else if (CC.findString mode "matrix" == True) then
+            do let m = Eval.eval (CC.getStringArg mode "matrix")
+               CC.printVM (VD.matrix cipher m)
+          
+          ---------- CALCULATE IC ----------
+          else if (CC.findString mode "ic" == True) then
+            do let m = Eval.eval (CC.getStringArg mode "ic")
+               print (VD.ic (VD.matrix cipher m))
+          
+          ---------- CALCULATE M_j ----------
+          else if (CC.findString mode "M" == True) then
+            do let m = Eval.eval (CC.getStringArg mode "M")
+               let matrix = VD.matrix cipher m
+               CC.printVM matrix
+               mainM matrix
+          
+          ---------- DECRYPTION MODE ----------
           else if (mode=="dv") then
-            mainDV cipher
+            do mainDV cipher
+          
+          ---------- DECRYPTION MODE (WITH INPUT) ----------
           else if (mode=="dvi") then
             do putStr "  cipher > "
                input <- getLine
                mainDV input
-          else if (Eval.findEval mode == True) then
+          
+          ---------- EVALUATE STRING ----------
+          else if (CC.findString mode "eval" == True) then
             do putStr "  result : "
-               print (Eval.eval (Eval.getEvalInput mode))
+               print (Eval.eval (CC.getStringArg mode "eval"))
                putStr "\n"
-               main
+          
+          ---------- QUIT ----------
           else if (mode==":quit") then
-            putStr "Goodbye :)\n\n"
+            do putStr "Goodbye :)\n\n"
+          
+          ---------- UNKNOWN COMMAND ----------
           else
             do putStr "Unknown command.\n"
-               main
           
+          ---------- REPEAT MAIN ----------
+          if (mode==":quit") then
+            do putStr ""
+          else
+            do main

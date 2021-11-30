@@ -1,8 +1,6 @@
 module Cryptography.Eval (
     stringToInt,
-    eval,
-    findEval,
-    getEvalInput
+    eval
 ) where
 
 import Data.Char
@@ -30,18 +28,10 @@ eval'' [] (op:ops) acc = acc
 eval'' (n:nums) [] acc = acc
 eval'' (n:nums) (op:ops) acc | op=='+' = eval'' nums ops (acc + n)
                              | op=='-' = eval'' nums ops (acc - n)
-                             | otherwise = 0
+                             | otherwise = eval'' (n:nums) ops acc
 
 eval' :: [Int] -> [Char] -> Int
 eval' (n:nums) ops = eval'' nums ops n
 
 eval :: String -> Int
 eval xs = eval' (map (\x -> stringToInt x) (evalSplitNum xs "")) (evalSplitOp xs)
-
-findEval :: String -> Bool
-findEval (a:b:c:d:e:xs) = a=='e' && b=='v' && c=='a' && d=='l' && e==' '
-findEval _ = False
-
-getEvalInput :: String -> String
-getEvalInput (a:b:c:d:e:xs) = xs
-getEvalInput _ = ""
